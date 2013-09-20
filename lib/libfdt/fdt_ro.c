@@ -14,6 +14,8 @@
 
 #include "libfdt_internal.h"
 
+#define max(x, y) (((x) < (y)) ? (y) : (x))
+
 static int _fdt_nodename_eq(const void *fdt, int offset,
 			    const char *s, int len)
 {
@@ -489,6 +491,32 @@ int fdt_stringlist_contains(const char *strlist, int listlen, const char *str)
 		strlist = p + 1;
 	}
 	return 0;
+}
+
+int fdt_get_string_index(const void *fdt, int node, const char *property,
+			 const char *string)
+{
+	const char *list, *end;
+	int len, index = 0;
+
+	list = fdt_getprop(fdt, node, property, &len);
+	if (!list)
+		return len;
+
+	end = list + len;
+
+	while (list < end) {
+		int n = strlen(string);
+		int m = strlen(list);
+
+		if (n == m && memcmp(list, string, n) == 0)
+			return index;
+
+		list += max(n, m) + 1;
+		index++;
+	}
+
+	return -FDT_ERR_NOTFOUND;
 }
 
 int fdt_node_check_compatible(const void *fdt, int nodeoffset,
