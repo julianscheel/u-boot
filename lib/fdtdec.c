@@ -691,4 +691,47 @@ int fdtdec_read_fmap_entry(const void *blob, int node, const char *name,
 
 	return 0;
 }
+
+int fdt_get_resource(const void *fdt, int node, const char *property,
+		     unsigned int index, struct fdt_resource *res)
+{
+	const fdt32_t *ptr, *end;
+	unsigned int i = 0;
+	int na, ns, len;
+
+	na = fdt_n_addr_cells(fdt, node);
+	ns = fdt_n_size_cells(fdt, node);
+
+	ptr = fdt_getprop(fdt, node, property, &len);
+	if (!ptr)
+		return len;
+
+	end = ptr + len / 4;
+
+	while (ptr + na + ns <= end) {
+		if (i == index) {
+			res->start = fdt_addr_to_cpu(*ptr);
+			res->end = res->start + fdt_size_to_cpu(ptr[na]) - 1;
+			return 0;
+		}
+
+		ptr += na + ns;
+		i++;
+	}
+
+	return -FDT_ERR_NOTFOUND;
+}
+
+int fdt_get_named_resource(const void *fdt, int node, const char *property,
+			   const char *names, const char *name,
+			   struct fdt_resource *res)
+{
+	int index;
+
+	index = fdt_get_string_index(fdt, node, names, name);
+	if (index < 0)
+		return index;
+
+	return fdt_get_resource(fdt, node, property, index, res);
+}
 #endif
