@@ -530,3 +530,39 @@ int fdt_node_offset_by_compatible(const void *fdt, int startoffset,
 
 	return offset; /* error from fdt_next_node() */
 }
+
+int fdt_n_addr_cells(const void *fdt, int node)
+{
+	const fdt32_t *prop;
+	int len, parent;
+
+	do {
+		parent = fdt_parent_offset(fdt, node);
+		if (parent >= 0)
+			node = parent;
+
+		prop = fdt_getprop(fdt, node, "#address-cells", &len);
+		if (prop)
+			return fdt32_to_cpu(*prop);
+	} while (parent >= 0);
+
+	return 1;
+}
+
+int fdt_n_size_cells(const void *fdt, int node)
+{
+	const fdt32_t *prop;
+	int len, parent;
+
+	do {
+		parent = fdt_parent_offset(fdt, node);
+		if (parent >= 0)
+			node = parent;
+
+		prop = fdt_getprop(fdt, node, "#size-cells", &len);
+		if (prop)
+			return fdt32_to_cpu(*prop);
+	} while (parent >= 0);
+
+	return 1;
+}

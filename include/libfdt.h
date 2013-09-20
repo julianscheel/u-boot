@@ -1638,4 +1638,32 @@ int fdt_find_regions(const void *fdt, char * const inc[], int inc_count,
 		     struct fdt_region region[], int max_regions,
 		     char *path, int path_len, int add_string_tab);
 
+/**
+ * fdt_n_addr_cells() - find the number of address cells required by a node
+ *
+ * Looks up the #address-cells property of the node to examine. If that has
+ * no such property, walks up the device tree until it finds one in one of
+ * the device's parents. If no #address-cells property is found, it is
+ * assumed to be 1.
+ *
+ * @param fdt		FDT blob
+ * @param node		node to examine
+ * @return number of address cells
+ */
+int fdt_n_addr_cells(const void *fdt, int node);
+
+/**
+ * fdt_n_size_cells() - find the number of size cells required by a node
+ *
+ * Looks up the #size-cells property of the node to examine. If that has no
+ * such property, walks up the device tree until it finds one in one of the
+ * device's parents. If no #size-cells property is found, it is assumed to
+ * be 1.
+ *
+ * @param fdt		FDT blob
+ * @param node		node to examine
+ * @return number of size cells
+ */
+int fdt_n_size_cells(const void *fdt, int node);
+
 #endif /* _LIBFDT_H */
