@@ -14,4 +14,5 @@ obj-y += clock.o
 obj-y += lowlevel_init.o
 obj-y += pinmux-common.o
 obj-y += powergate.o
+obj-y += xusb-padctl.o
 obj-$(CONFIG_DISPLAY_CPUINFO) += sys_info.o
