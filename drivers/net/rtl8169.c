@@ -283,11 +283,31 @@ struct RxDesc {
 #  define RTL8169_ALIGN 256
 #endif
 
+/*
+ * TX and RX descriptors are 16 bytes. This causes problems with the cache
+ * maintenance on CPUs where the cache-line size exceeds the size of these
+ * descriptors. What will happen is that when the driver receives a packet
+ * it will be immediately requeued for the hardware to reuse. The CPU will
+ * therefore need to flush the cache-line containing the descriptor, which
+ * will cause all other descriptors in the same cache-line to be flushed
+ * along with it. If one of those descriptors had been written to by the
+ * device those changes (and the associated packet) will be lost.
+ *
+ * To work around this, we make use of non-cached memory if available. If
+ * descriptors are mapped uncached there's no need to manually flush them
+ * or invalidate them.
+ *
+ * Note that this only applies to descriptors. The packet data buffers do
+ * not have the same constraints since they are 1536 bytes large, so they
+ * are unlikely to share cache-lines.
+ */
+#ifndef CONFIG_SYS_NONCACHED_MEMORY
 /* Define the TX Descriptor */
 DEFINE_ALIGN_BUFFER(struct TxDesc, tx_ring, NUM_TX_DESC, RTL8169_ALIGN);
 
 /* Define the RX Descriptor */
 DEFINE_ALIGN_BUFFER(struct RxDesc, rx_ring, NUM_RX_DESC, RTL8169_ALIGN);
+#endif
 
 /*
  * Create a static buffer of size RX_BUF_SZ for each TX Descriptor. All
@@ -412,28 +432,36 @@ match:
 
 static void rtl_inval_rx_desc(struct RxDesc *desc)
 {
+#ifndef CONFIG_SYS_NONCACHED_MEMORY
 	unsigned long start = (unsigned long)desc & ~(ARCH_DMA_MINALIGN - 1);
 	unsigned long end = ALIGN(start + sizeof(*desc), ARCH_DMA_MINALIGN);
 
 	invalidate_dcache_range(start, end);
+#endif
 }
 
 static void rtl_flush_rx_desc(struct RxDesc *desc)
 {
+#ifndef CONFIG_SYS_NONCACHED_MEMORY
 	flush_cache((unsigned long)desc, sizeof(*desc));
+#endif
 }
 
 static void rtl_inval_tx_desc(struct TxDesc *desc)
 {
+#ifndef CONFIG_SYS_NONCACHED_MEMORY
 	unsigned long start = (unsigned long)desc & ~(ARCH_DMA_MINALIGN - 1);
 	unsigned long end = ALIGN(start + sizeof(*desc), ARCH_DMA_MINALIGN);
 
 	invalidate_dcache_range(start, end);
+#endif
 }
 
 static void rtl_flush_tx_desc(struct TxDesc *desc)
 {
+#ifndef CONFIG_SYS_NONCACHED_MEMORY
 	flush_cache((unsigned long)desc, sizeof(*desc));
+#endif
 }
 
 static void rtl_inval_buffer(void *buf, size_t size)
@@ -769,6 +797,9 @@ INIT - Look for an adapter, this routine's visible to the outside
 static int rtl_init(struct eth_device *dev, bd_t *bis)
 {
 	static int board_idx = -1;
+#ifdef CONFIG_SYS_NONCACHED_MEMORY
+	size_t size;
+#endif
 	int i, rc;
 	int option = -1, Cap10_100 = 0, Cap1000 = 0;
 
@@ -899,6 +930,7 @@ static int rtl_init(struct eth_device *dev, bd_t *bis)
 #endif
 	}
 
+#ifndef CONFIG_SYS_NONCACHED_MEMORY
 	/*
 	 * Warn if the cache-line size is larger than the descriptor size. In
 	 * such cases the driver will likely fail because the CPU needs to
@@ -910,6 +942,17 @@ static int rtl_init(struct eth_device *dev, bd_t *bis)
 
 	tpc->TxDescArray = tx_ring;
 	tpc->RxDescArray = rx_ring;
+#else
+	/*
+	 * When non-cached memory is available, allocate the descriptors from
+	 * an uncached memory region to avoid any problems caused by caching.
+	 */
+	size = NUM_TX_DESC * sizeof(struct TxDesc);
+	tpc->TxDescArray = (struct TxDesc *)noncached_alloc(size, 256);
+
+	size = NUM_RX_DESC * sizeof(struct RxDesc);
+	tpc->RxDescArray = (struct RxDesc *)noncached_alloc(size, 256);
+#endif
 
 	return 1;
 }
