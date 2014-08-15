@@ -47,15 +47,15 @@ __weak void mmu_page_table_flush(unsigned long start, unsigned long stop)
 	debug("%s: Warning: not implemented\n", __func__);
 }
 
-void mmu_set_region_dcache_behaviour(u32 start, int size,
+void mmu_set_region_dcache_behaviour(unsigned long start, unsigned long size,
 				     enum dcache_option option)
 {
 	u32 *page_table = (u32 *)gd->arch.tlb_addr;
-	u32 upto, end;
+	unsigned long upto, end;
 
 	end = ALIGN(start + size, MMU_SECTION_SIZE) >> MMU_SECTION_SHIFT;
 	start = start >> MMU_SECTION_SHIFT;
-	debug("%s: start=%x, size=%x, option=%d\n", __func__, start, size,
+	debug("%s: start=%lx, size=%lx, option=%d\n", __func__, start, size,
 	      option);
 	for (upto = start; upto < end; upto++)
 		set_section_dcache(upto, option);
