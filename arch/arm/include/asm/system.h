@@ -211,6 +211,11 @@ void mmu_set_region_dcache_behaviour(unsigned long start, unsigned long size,
  */
 void mmu_page_table_flush(unsigned long start, unsigned long stop);
 
+#ifdef CONFIG_SYS_NONCACHED_MEMORY
+void noncached_init(void);
+unsigned long noncached_alloc(size_t size, size_t align);
+#endif /* CONFIG_SYS_NONCACHED_MEMORY */
+
 #endif /* __ASSEMBLY__ */
 
 #define arch_align_stack(x) (x)
