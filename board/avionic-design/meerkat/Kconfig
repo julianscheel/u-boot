@@ -1,0 +1,24 @@
+if TARGET_MEERKAT
+
+config SYS_CPU
+	string
+	default "arm720t" if SPL_BUILD
+	default "armv7" if !SPL_BUILD
+
+config SYS_BOARD
+	string
+	default "meerkat"
+
+config SYS_VENDOR
+	string
+	default "avionic-design"
+
+config SYS_SOC
+	string
+	default "tegra124"
+
+config SYS_CONFIG_NAME
+	string
+	default "meerkat"
+
+endif

@@ -1,0 +1,6 @@
+TEC-NG BOARD
+M:	Julian Scheel <julian@jusst.de>
+S:	Maintained
+F:	board/avionic-design/meerkat
+F:	include/configs/meerkat.h
+F:	configs/meerkat

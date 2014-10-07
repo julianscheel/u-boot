@@ -704,6 +704,9 @@ config TARGET_COLIBRI_T20_IRIS
 config TARGET_TEC_NG
 	bool "Support tec-ng"
 
+config TARGET_MEERKAT
+	bool "Support meerkat"
+
 config TARGET_BEAVER
 	bool "Support beaver"
 
@@ -814,6 +817,7 @@ source "board/atmel/at91sam9x5ek/Kconfig"
 source "board/atmel/sama5d3_xplained/Kconfig"
 source "board/atmel/sama5d3xek/Kconfig"
 source "board/avionic-design/medcom-wide/Kconfig"
+source "board/avionic-design/meerkat/Kconfig"
 source "board/avionic-design/plutux/Kconfig"
 source "board/avionic-design/tec-ng/Kconfig"
 source "board/avionic-design/tec/Kconfig"
