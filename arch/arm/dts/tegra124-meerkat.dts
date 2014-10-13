@@ -318,7 +318,7 @@
 
 	usb@7d008000 {
 		status = "okay";
-		nvidia,vbus-gpio = <&gpio 109 0>; /* gpio PN5, USB_VBUS_EN1 */
+		nvidia,vbus-gpio = <&gpio 249 0>; /* gpio PFF1, USB_VBUS_EN2 */
 	};
 
 	regulators {
