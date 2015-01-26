@@ -5,6 +5,10 @@
 	model = "Avionic-Design Meerkat";
 	compatible = "ad,meerkat", "nvidia,tegra124";
 
+	aliases {
+		i2c0 = "/i2c@7000d000";
+	};
+
 	memory {
 		device_type = "memory";
 		reg = <0x80000000 0x80000000>;
